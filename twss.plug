@@ -1,0 +1,9 @@
+[Core]
+Name = TwssBot
+Module = twss
+
+[Documentation]
+Description = That's what she said
+
+[Python]
+Version = 2
