@@ -60,6 +60,8 @@ class TwssBot(BotPlugin):
         # The tolerance for considering a message as twss
         self.threshold = 0.8
 
+        self._load_model()
+
     def _p_twss_response(self, sentence):
         doc = avg_word_vector(sentence)
         return self.model.predict_proba(doc)[0,1]
@@ -81,6 +83,13 @@ class TwssBot(BotPlugin):
 
         self.threshold = negative + (diff / 2)
         self.log.info('- threshold %s', self.threshold)
+
+    def _load_model(self):
+        try:
+            self.model = joblib.load(os.path.join(TWSS_DIR, 'data', 'twss_rf.pkl'))
+            return True
+        except:
+            return False
 
     @botcmd(split_args_with=None)
     def twss_train(self, mess, args):
@@ -105,11 +114,8 @@ class TwssBot(BotPlugin):
     @botcmd(split_args_with=None)
     def twss_reload(self, mess, args):
         """Attempt to load a saved model from disk"""
-        try:
-            self.model = joblib.load(os.path.join(TWSS_DIR, 'data', 'twss_rf.pkl'))
+        if self._load_model():
             self.send(mess.frm, "\"You miss 100%% of the shots you don't take ~ Wayne Gretsky\" ~ Michael Scott", message_type=mess.type)
-        except:
-            pass
 
     @botcmd(split_args_with=None)
     def twss_yes(self, mess, args):
