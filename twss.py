@@ -127,8 +127,17 @@ class TwssBot(BotPlugin):
 
         # TODO ignore any messages from self
 
-        threshold = self.config['threshold'] or threshold_default
-        alpha = self.config['alpha'] or alpha_default
+        threshold = None
+        alpha = None
+
+        if self.config:
+            threshold = self.config['threshold']
+            alpha = self.config['alpha']
+
+        if not threshold:
+            threshold = threshold_default
+        if not alpha:
+            alpha = alpha_default
 
         if self.model is None:
             return
