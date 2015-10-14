@@ -107,6 +107,7 @@ class TwssBot(BotPlugin):
         """Attempt to load a saved model from disk"""
         try:
             self.model = joblib.load(os.path.join(TWSS_DIR, 'data', 'twss_rf.pkl'))
+            self.send(mess.frm, "\"You miss 100%% of the shots you don't take ~ Wayne Gretsky\" ~ Michael Scott", message_type=mess.type)
         except:
             pass
 
