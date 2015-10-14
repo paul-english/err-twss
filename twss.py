@@ -137,14 +137,14 @@ class TwssBot(BotPlugin):
             f.write(self.last_message)
             self.last_message = None
 
-    @botcomd(split_args_with=None)
+    @botcmd(split_args_with=None)
     def twss_alpha(self, mess, args):
         """Manually set alpha"""
         self.log.info('set alpha')
         self.log.info(args)
         alpha = args[0]
 
-    @botcomd(split_args_with=None)
+    @botcmd(split_args_with=None)
     def twss_threshol(self, mess, args):
         """Manually set threshold"""
         self.log.info('set threshold')
