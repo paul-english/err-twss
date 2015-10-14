@@ -165,7 +165,7 @@ class TwssBot(BotPlugin):
             return
 
         p = self._p_twss_response(mess.body)
-        self.log.info('-- twss message %s %s', p, mess)
+        self.log.info('-- twss message p: %s, alpha: %s, mess: %s', p, alpha, mess)
 
         if p > self.threshold and random() < alpha:
             self.last_message = mess.body
