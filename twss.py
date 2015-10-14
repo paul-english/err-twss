@@ -58,7 +58,7 @@ class TwssBot(BotPlugin):
         self.last_message = None
 
         # The tolerance for considering a message as twss
-        self.threshold = 0.8
+        self.threshold = 0.7
 
         self._load_model()
 
