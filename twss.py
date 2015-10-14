@@ -12,10 +12,6 @@ TWSS_DIR = os.path.dirname(os.path.realpath(__file__))
 TWSS_DATA = os.path.join(TWSS_DIR, 'data', 'twss.txt')
 NONTWSS_DATA = os.path.join(TWSS_DIR, 'data', 'non_twss.txt')
 
-# This represents the probability that we respond, given something
-# said is twss. Lower values will make this bot respond less often.
-alpha = 0.3
-
 nlp = English()
 
 def avg_word_vector(doc):
@@ -59,6 +55,10 @@ class TwssBot(BotPlugin):
 
         # The tolerance for considering a message as twss
         self.threshold = 0.7
+
+        # This represents the probability that we respond, given something
+        # said is twss. Lower values will make this bot respond less often.
+        self.alpha = 0.6
 
         self._load_model()
 
@@ -143,7 +143,7 @@ class TwssBot(BotPlugin):
         self.log.info('set alpha')
         self.log.info(args)
         try:
-            alpha = float(args[0])
+            self.alpha = float(args[0])
         except:
             pass
 
@@ -165,8 +165,8 @@ class TwssBot(BotPlugin):
             return
 
         p = self._p_twss_response(mess.body)
-        self.log.info('-- twss message p: %s, alpha: %s, mess: %s', p, alpha, mess)
+        self.log.info('-- twss message p: %s, alpha: %s, mess: %s', p, self.alpha, mess)
 
-        if p > self.threshold and random() < alpha:
+        if p > self.threshold and random() < self.alpha:
             self.last_message = mess.body
             self.send(mess.frm, "That's what she said.", message_type=mess.type)
