@@ -102,7 +102,7 @@ class TwssBot(BotPlugin):
         self.log.info('X shape: %s', X.shape)
 
         self.model = RandomForestClassifier(n_estimators=1000,)
-        score = cross_val_score(self.model, X, y, 'log_loss', cv=3, n_jobs=5, verbose=1).mean()
+        score = cross_val_score(self.model, X, y, 'log_loss', cv=3, n_jobs=1, verbose=1).mean()
         self.log.info('score: %s', score)
 
         self.model.fit(X,y)
