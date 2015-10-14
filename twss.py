@@ -14,7 +14,7 @@ NONTWSS_DATA = os.path.join(TWSS_DIR, 'data', 'non_twss.txt')
 
 # This represents the probability that we respond, given something
 # said is twss. Lower values will make this bot respond less often.
-alpha = 0.8
+alpha = 0.3
 
 nlp = English()
 
@@ -142,22 +142,30 @@ class TwssBot(BotPlugin):
         """Manually set alpha"""
         self.log.info('set alpha')
         self.log.info(args)
-        alpha = args[0]
+        try:
+            alpha = float(args[0])
+        except:
+            pass
 
     @botcmd(split_args_with=None)
-    def twss_threshol(self, mess, args):
+    def twss_threshold(self, mess, args):
         """Manually set threshold"""
         self.log.info('set threshold')
         self.log.info(args)
-        self.threshold = args[0]
+        try:
+            self.threshold = float(args[0])
+        except:
+            pass
 
     def callback_message(self, mess):
-        self.log.info('-- cb message %s', mess)
+
+        # TODO ignore any messages from self
 
         if self.model is None:
             return
 
         p = self._p_twss_response(mess.body)
+        self.log.info('-- twss message %s %s', p, mess)
 
         if p > self.threshold and random() < alpha:
             self.last_message = mess.body
