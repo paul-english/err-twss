@@ -6,4 +6,4 @@ Module = twss
 Description = That's what she said
 
 [Python]
-Version = 2
+Version = 2+
