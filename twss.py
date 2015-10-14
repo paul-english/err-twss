@@ -14,6 +14,9 @@ NONTWSS_DATA = os.path.join(TWSS_DIR, 'data', 'non_twss.txt')
 
 nlp = English()
 
+threshold_default = 0.75
+alpha_default = 0.6
+
 def avg_word_vector(doc):
     tokens = nlp(gensim.utils.to_unicode(doc))
     vectors = np.array([t.vector for t in tokens])
@@ -53,36 +56,11 @@ class TwssBot(BotPlugin):
         self.model = None
         self.last_message = None
 
-        # The tolerance for considering a message as twss
-        self.threshold = 0.7
-
-        # This represents the probability that we respond, given something
-        # said is twss. Lower values will make this bot respond less often.
-        self.alpha = 0.6
-
         self._load_model()
 
     def _p_twss_response(self, sentence):
         doc = avg_word_vector(sentence)
         return self.model.predict_proba(doc)[0,1]
-
-    def _estimate_threshold(self):
-        positive = np.array([
-            self._p_twss_response("Does the skin look red and swollen?"),
-            self._p_twss_response("just touch it!"),
-            self._p_twss_response("put it in"),
-            self._p_twss_response("My mother's coming."),
-        ]).mean()
-
-        negative = np.array([
-            self._p_twss_response("A lot of companies"),
-            self._p_twss_response("I'm going to draw a graph"),
-        ]).mean()
-
-        diff = abs(positive - negative)
-
-        self.threshold = negative + (diff / 2)
-        self.log.info('- threshold %s', self.threshold)
 
     def _load_model(self):
         try:
@@ -90,6 +68,16 @@ class TwssBot(BotPlugin):
             return True
         except:
             return False
+
+    def get_configuration_template(self):
+        return {
+            # The tolerance for considering a message as twss
+            'threshold': threshold_default,
+
+            # This represents the probability that we respond, given something
+            # said is twss. Lower values will make this bot respond less often.
+            'alpha': alpha_default,
+        }
 
     @botcmd(split_args_with=None)
     def twss_train(self, mess, args):
@@ -108,8 +96,6 @@ class TwssBot(BotPlugin):
         self.model.fit(X,y)
 
         joblib.dump(self.model, os.path.join(TWSS_DIR, 'data', 'twss_rf.pkl'))
-
-        self._estimate_threshold()
 
     @botcmd(split_args_with=None)
     def twss_reload(self, mess, args):
@@ -137,36 +123,19 @@ class TwssBot(BotPlugin):
             f.write(self.last_message)
             self.last_message = None
 
-    @botcmd(split_args_with=None)
-    def twss_alpha(self, mess, args):
-        """Manually set alpha"""
-        self.log.info('set alpha')
-        self.log.info(args)
-        try:
-            self.alpha = float(args[0])
-        except:
-            pass
-
-    @botcmd(split_args_with=None)
-    def twss_threshold(self, mess, args):
-        """Manually set threshold"""
-        self.log.info('set threshold')
-        self.log.info(args)
-        try:
-            self.threshold = float(args[0])
-        except:
-            pass
-
     def callback_message(self, mess):
 
         # TODO ignore any messages from self
+
+        threshold = self.config['threshold'] or threshold_default
+        alpha = self.config['alpha'] or alpha_default
 
         if self.model is None:
             return
 
         p = self._p_twss_response(mess.body)
-        self.log.info('-- twss message p: %s, alpha: %s, mess: %s', p, self.alpha, mess)
+        self.log.info('-- twss message p: %s, alpha: %s, mess: %s', p, alpha, mess)
 
-        if p > self.threshold and random() < self.alpha:
+        if p > threshold and random() < alpha:
             self.last_message = mess.body
             self.send(mess.frm, "That's what she said.", message_type=mess.type)
